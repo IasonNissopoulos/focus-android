@@ -138,9 +138,19 @@ android {
         // WebView
         ////////////////////////////////////////////////////////////////////////////////////////////
 
-        // Release
+        androidTest {
+            res.srcDir('src/androidTest/assets')
+            java.srcDirs += ['src/androidTest/java']
+        }
 
-        focusWebviewUniversalRelease {
+        androidTestWebviewCompile {
+            java.srcDirs += ['src/androidTestWebview/java']
+        }
+
+        androidTestGeckoCompile {
+            java.srcDirs += ['src/androidTestGecko/java']
+        }
+            focusWebviewUniversalRelease {
             java.srcDir 'src/focusRelease/java'
             manifest.srcFile 'src/focusRelease/AndroidManifest.xml'
             res.srcDir 'src/focusRelease/res'

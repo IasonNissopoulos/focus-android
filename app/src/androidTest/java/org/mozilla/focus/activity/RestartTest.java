@@ -21,21 +21,22 @@ import android.support.test.uiautomator.Until;
 import junit.framework.Assert;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mozilla.focus.helpers.TestHelper;
 
 import java.io.IOException;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.mozilla.focus.helpers.TestHelper;
 
 import static junit.framework.Assert.assertTrue;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mozilla.focus.helpers.TestHelper.waitingTime;
 import static org.mozilla.focus.fragment.FirstrunFragment.FIRSTRUN_PREF;
+import static org.mozilla.focus.helpers.TestHelper.waitingTime;
 
 // This test closes the app via recent apps list, and restarts
 @RunWith(AndroidJUnit4.class)
@@ -94,6 +95,12 @@ public class RestartTest {
         }
     };
 
+    // Disabled in geckoview since it accesses web element
+    @Before
+    public void checkWebview() {
+        org.junit.Assume.assumeFalse(TestHelper.getAppName().contains("gecko"));
+    }
+
     @After
     public void tearDown() throws Exception {
         mActivityTestRule.getActivity().finishAndRemoveTask();
@@ -135,13 +142,7 @@ public class RestartTest {
         TestHelper.mDevice.wait(Until.hasObject(By.pkg(launcherPackage).depth(0)),
                 LAUNCH_TIMEOUT);
 
-        // Re-Launch the app
-        Context context = InstrumentationRegistry.getInstrumentation()
-                .getTargetContext()
-                .getApplicationContext();
-        final Intent intent = context.getPackageManager()
-                .getLaunchIntentForPackage(FOCUS_DEBUG_APP);
-        mActivityTestRule.launchActivity(intent);
+        mActivityTestRule.launchActivity(new Intent(Intent.ACTION_MAIN));
 
         // Make sure website can be loaded without issue
         TestHelper.inlineAutocompleteEditText.waitForExists(waitingTime);

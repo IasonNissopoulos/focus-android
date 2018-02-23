@@ -16,18 +16,19 @@ import android.support.test.uiautomator.UiSelector;
 
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mozilla.focus.helpers.TestHelper;
 
 import java.io.IOException;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.mozilla.focus.helpers.TestHelper;
 
-import static org.mozilla.focus.helpers.TestHelper.waitingTime;
 import static org.mozilla.focus.fragment.FirstrunFragment.FIRSTRUN_PREF;
+import static org.mozilla.focus.helpers.TestHelper.waitingTime;
 
 @RunWith(AndroidJUnit4.class)
 public class DownloadTest {
@@ -82,6 +83,12 @@ public class DownloadTest {
             }
         }
     };
+
+    // Disabled in geckoview since it accesses web element
+    @Before
+    public void checkWebview() {
+        org.junit.Assume.assumeFalse(TestHelper.getAppName().contains("gecko"));
+    }
 
     @After
     public void tearDown() throws Exception {

@@ -51,7 +51,44 @@ def generate_ui_test_task(dependencies):
 		description = "Run UI tests for Focus/Klar for Android.",
 		command = ('echo "--" > .adjust_token'
 			' && ./gradlew --no-daemon clean assembleFocusWebviewUniversalDebug assembleFocusWebviewUniversalDebugAndroidTest'
-			' && tools/taskcluster/execute-firebase-test.sh'),
+			' && ./tools/taskcluster/google-firebase-testlab-login.sh'
+			' && tools/taskcluster/execute-firebase-test.sh focusWebviewUniversal app-focus-webview-universal-debug model=sailfish,version=26 model=Nexus5X,version=23 model=Nexus9,version=25 model=sailfish,version=25'),
+		dependencies = dependencies,
+		scopes = [ 'secrets:get:project/focus/firebase' ],
+		artifacts = {
+			"public": {
+				"type": "directory",
+				"path": "/opt/focus-android/test_artifacts",
+				"expires": taskcluster.stringDate(taskcluster.fromNow('1 week'))
+			}
+		})
+
+def generate_gecko_X86_ui_test_task(dependencies):
+	return taskcluster.slugId(), generate_task(
+		name = "(Focus for Android) UI tests",
+		description = "Run UI tests for Klar Gecko X86 for Android.",
+		command = ('echo "--" > .adjust_token'
+			' && ./gradlew --no-daemon clean assembleklarGeckoX86Debug assembleklarGeckoX86DebugAndroidTest'
+			' && ./tools/taskcluster/google-firebase-testlab-login.sh'
+			' && tools/taskcluster/execute-firebase-test.sh klarGeckoX86 app-klar-gecko-x86-debug model=Nexus5X,version=23'),
+		dependencies = dependencies,
+		scopes = [ 'secrets:get:project/focus/firebase' ],
+		artifacts = {
+			"public": {
+				"type": "directory",
+				"path": "/opt/focus-android/test_artifacts",
+				"expires": taskcluster.stringDate(taskcluster.fromNow('1 week'))
+			}
+		})
+
+def generate_gecko_ARM_ui_test_task(dependencies):
+	return taskcluster.slugId(), generate_task(
+		name = "(Focus for Android) UI tests",
+		description = "Run UI tests for Klar Gecko ARM build for Android.",
+		command = ('echo "--" > .adjust_token'
+			' && ./gradlew --no-daemon clean assembleklarGeckoArmDebug assembleklarGeckoArmDebugAndroidTest'
+			' && ./tools/taskcluster/google-firebase-testlab-login.sh'
+			' && tools/taskcluster/execute-firebase-test.sh klarGeckoArm app-klar-gecko-arm-debug model=sailfish,version=26'),
 		dependencies = dependencies,
 		scopes = [ 'secrets:get:project/focus/firebase' ],
 		artifacts = {
@@ -151,6 +188,10 @@ if __name__ == "__main__":
 	schedule_task(queue, codeQualityTaskId, codeQualityTask)
 
 	uiTestTaskId, uiTestTask = generate_ui_test_task([unitTestTaskId, codeQualityTaskId])
+	schedule_task(queue, uiTestTaskId, uiTestTask)
+	uiTestTaskId, uiTestTask = generate_gecko_X86_ui_test_task([unitTestTaskId, codeQualityTaskId])
+	schedule_task(queue, uiTestTaskId, uiTestTask)
+	uiTestTaskId, uiTestTask = generate_gecko_ARM_ui_test_task([unitTestTaskId, codeQualityTaskId])
 	schedule_task(queue, uiTestTaskId, uiTestTask)
 
 	releaseTaskId, releaseTask = generate_release_task([unitTestTaskId, codeQualityTaskId])

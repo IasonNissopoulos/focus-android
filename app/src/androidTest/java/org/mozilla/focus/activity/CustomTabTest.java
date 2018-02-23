@@ -20,16 +20,17 @@ import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mozilla.focus.R;
+import org.mozilla.focus.helpers.TestHelper;
 
 import java.io.IOException;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.mozilla.focus.helpers.TestHelper;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
@@ -45,6 +46,7 @@ import static android.support.test.espresso.web.webdriver.DriverAtoms.getText;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.mozilla.focus.fragment.FirstrunFragment.FIRSTRUN_PREF;
 
+
 @RunWith(AndroidJUnit4.class)
 public class CustomTabTest {
     private static final String MENU_ITEM_LABEL = "TestItem4223";
@@ -58,9 +60,17 @@ public class CustomTabTest {
     public ActivityTestRule<MainActivity> activityTestRule  = new ActivityTestRule<>(
             MainActivity.class, true, false);
 
+    // Disabled in geckoview since it accesses web element
+    @Before
+    public void checkWebview() {
+        org.junit.Assume.assumeFalse(TestHelper.getAppName().contains("gecko"));
+    }
+
     @After
     public void tearDown() throws Exception {
-        activityTestRule.getActivity().finishAndRemoveTask();
+        if (!TestHelper.getAppName().contains("gecko")) {
+            activityTestRule.getActivity().finishAndRemoveTask();
+        }
     }
 
     @Test

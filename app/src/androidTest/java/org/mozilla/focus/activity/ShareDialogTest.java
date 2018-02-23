@@ -15,6 +15,7 @@ import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.test.uiautomator.UiSelector;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,8 +23,8 @@ import org.mozilla.focus.helpers.TestHelper;
 
 import static android.support.test.espresso.action.ViewActions.click;
 import static junit.framework.Assert.assertTrue;
-import static org.mozilla.focus.helpers.TestHelper.waitingTime;
 import static org.mozilla.focus.fragment.FirstrunFragment.FIRSTRUN_PREF;
+import static org.mozilla.focus.helpers.TestHelper.waitingTime;
 
 // This test opens share menu
 @RunWith(AndroidJUnit4.class)
@@ -48,6 +49,12 @@ public class ShareDialogTest {
         }
     };
 
+    // Disabled in geckoview since it accesses web element
+    @Before
+    public void checkWebview() {
+        org.junit.Assume.assumeFalse(TestHelper.getAppName().contains("gecko"));
+    }
+
     @After
     public void tearDown() throws Exception {
         mActivityTestRule.getActivity().finishAndRemoveTask();
@@ -57,7 +64,7 @@ public class ShareDialogTest {
     public void shareTest() throws InterruptedException, UiObjectNotFoundException {
 
         UiObject shareBtn = TestHelper.mDevice.findObject(new UiSelector()
-                .resourceId("org.mozilla.focus.debug:id/share")
+                .resourceId(TestHelper.getAppName() + ":id/share")
                 .enabled(true));
 
         /* Go to a webpage */
